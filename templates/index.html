@@ -1,0 +1,13 @@
+<script src="https://cdn.jsdelivr.net/hls.js/latest/hls.min.js"></script>
+<audio controls></audio>
+<script>
+	if(Hls.isSupported()){
+		var media = document.querySelector("audio");
+		var hls = new Hls();
+		hls.loadSource('static/live.m3u8');
+		hls.attachMedia(media);
+		hls.on(Hls.Events.MANIFEST_PARSED, function(){
+			media.play();
+		});
+	}
+</script>

@@ -12,7 +12,7 @@ from win32gui import *
 from win32process import *
 
 # 共通設定
-waitSec = 0.5
+waitSec = 0.75
 windowName = "VOICEROID＋ 東北きりたん EX"
 
 def talk(inputText):
@@ -24,7 +24,7 @@ def talk(inputText):
 		pass
 		
 	# ファイルが存在してたらやめる
-	outfile = outdir + hashlib.md5(inputText.encode("utf-8")).hexdigest() + ".mp3"
+	outfile = outdir + hashlib.md5(inputText.encode("utf-8")).hexdigest() + ".wav"
 	if os.path.exists(outfile):
 		return outfile
 
@@ -115,17 +115,13 @@ def talk(inputText):
 			time.sleep(waitSec)
 		else:
 			break
-
-	# MP3に変換
-	subprocess.run(["ffmpeg", "-i", tmpfile, "-acodec", "libmp3lame", "-ab", "128k", "-ac", "2", "-ar", "44100", outfile])
 	
-	# 一時ファイルが存在していたら消す
 	try:
-		os.remove(tmpfile)
+		# ファイルを移動
+		os.rename(tmpfile, outfile)
+		# 一時ファイルが存在していたら消す
 		os.remove(tmpfile.replace("wav", "txt"))
 	except:
 		pass
 		
 	return outfile
-
-print(talk(sys.argv[1]))
