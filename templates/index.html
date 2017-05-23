@@ -4,7 +4,7 @@
 	if(Hls.isSupported()){
 		var media = document.querySelector("audio");
 		var hls = new Hls();
-		hls.loadSource('static/live.m3u8');
+		hls.loadSource('live.m3u8');
 		hls.attachMedia(media);
 		hls.on(Hls.Events.MANIFEST_PARSED, function(){
 			media.play();

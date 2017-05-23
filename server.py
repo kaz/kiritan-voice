@@ -10,7 +10,7 @@ app = flask.Flask(__name__)
 def index():
 	return flask.render_template('index.html')
 
-@app.route('/mp3', methods=['GET', 'POST'])
+@app.route('/say.mp3', methods=['GET', 'POST'])
 def gen_mp3():
 	r = flask.request
 	text = r.form['text'] if r.method == "POST" else r.args.get('text', None)
@@ -33,6 +33,13 @@ def say():
 		
 	encoder.enqueue(kiritan.talk(text))
 	return "ok"
+	
+@app.route('/live.m3u8', methods=['GET', 'POST'])
+def live():
+	return flask.Response(
+		response=encoder.playlist(),
+		mimetype="application/x-mpegURL"
+	)
 	
 if __name__ == '__main__':
 	encoder.livecasting()
