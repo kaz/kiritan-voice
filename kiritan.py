@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import hashlib
+import logging
 import threading
 import subprocess
 
@@ -16,6 +17,8 @@ waitSec = 0.75
 windowName = "VOICEROID＋ 東北きりたん EX"
 
 def talk(inputText):
+	logging.info("Generating WAV")
+	
 	# 出力先ディレクトリ作成
 	outdir = "./output/"
 	try:
