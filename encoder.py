@@ -6,6 +6,7 @@ import time
 import glob
 import logging
 import threading
+import traceback
 import subprocess
 
 # FFMPEGでファイルをMP3にエンコード
@@ -68,18 +69,21 @@ def __livecasting():
 	global seq
 	
 	while True:
-		if len(que) != 0:
-			# キューにデータがあればプレイリストに追加
-			tsl.extend(ts(que.pop(0)))
-		else:
-			# キューが空なら無音ファイルを配信
-			while len(tsl) < 3:
-				tsl.append(("2.04", "silent.ts"))
-		
-		# TS 1つ分だけ休憩する
-		time.sleep(float(tsl[0][0]))
-		tsl.pop(0)
-		seq += 1
+		try:
+			if len(que) != 0:
+				# キューにデータがあればプレイリストに追加
+				tsl.extend(ts(que.pop(0)))
+			else:
+				# キューが空なら無音ファイルを配信
+				while len(tsl) < 3:
+					tsl.append(("2.04", "silent.ts"))
+			
+			# TS 1つ分だけ休憩する
+			time.sleep(float(tsl[0][0]))
+			tsl.pop(0)
+			seq += 1
+		except:
+			logging.error(traceback.format_exc())
 
 # サーバ起動
 def livecasting():
