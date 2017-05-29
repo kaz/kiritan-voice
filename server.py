@@ -24,7 +24,8 @@ def gen_mp3():
 	
 	return flask.Response(
 		response=encoder.mp3(kiritan.talk(text)),
-		mimetype="audio/mp3"
+		mimetype="audio/mp3",
+		headers={"Access-Control-Allow-Origin": "*"}
 	)
 
 # ライブ配信へキューを投げる
@@ -63,5 +64,5 @@ if __name__ == '__main__':
 	logging.info("Starting twitter streaming listener")
 	twitter.listen()
 	logging.info("Starting HTTP server")
-	app.run(host='0.0.0.0', port=80, debug=False)
+	app.run(host='0.0.0.0', port=55556, debug=False)
 	

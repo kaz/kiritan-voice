@@ -23,7 +23,8 @@ def mp3(file):
 			"-ar", "44100",
 			"pipe:1.mp3"
 		],
-		stdout=subprocess.PIPE
+		stdout=subprocess.PIPE,
+		stderr=subprocess.DEVNULL
 	)
 	return data.stdout
 
