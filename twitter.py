@@ -2,13 +2,17 @@
 
 import re
 import tweepy
-import encoder
-import kiritan
 import logging
 import traceback
 import threading
 
-from twitter_token import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_SECRET
+import encoder
+import kiritan
+
+CONSUMER_KEY = ''
+CONSUMER_SECRET = ''
+ACCESS_TOKEN = ''
+ACCESS_SECRET = ''
 
 # ツイートを拾ってencoderに投げる
 class StreamListener(tweepy.StreamListener):

@@ -1,14 +1,30 @@
 # coding: UTF-8
 
 import flask
+import logging
+
 import encoder
 import kiritan
 import twitter
-import logging
 
 app = flask.Flask(__name__)
 
-# HLSプレイヤーを出力
+# ログ設定
+logging.basicConfig(
+	level=logging.INFO,
+	format='%(asctime)s: %(message)s',
+	datefmt='%Y/%m/%d %H:%M:%S'
+)
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+# いろいろ起動
+logging.info("Starting livecasting server")
+encoder.livecasting()
+logging.info("Starting twitter streaming listener")
+twitter.listen()
+
+# Webインタフェース
 @app.route('/', methods=['GET'])
 def index():
 	return flask.render_template('index.html')
@@ -27,6 +43,11 @@ def gen_mp3():
 		mimetype="audio/mp3",
 		headers={"Access-Control-Allow-Origin": "*"}
 	)
+
+# HLSプレイヤーを出力
+@app.route('/listen', methods=['GET'])
+def listen():
+	return flask.render_template('hls.html')
 
 # ライブ配信へキューを投げる
 @app.route('/say', methods=['GET', 'POST'])
@@ -50,19 +71,5 @@ def live():
 	
 # 起動
 if __name__ == '__main__':
-	logging.basicConfig(
-		level=logging.INFO,
-		format='%(asctime)s: %(message)s',
-		datefmt='%Y/%m/%d %H:%M:%S'
-	)
-	
-	log = logging.getLogger('werkzeug')
-	log.setLevel(logging.ERROR)
-	
-	logging.info("Starting livecasting server")
-	encoder.livecasting()
-	logging.info("Starting twitter streaming listener")
-	twitter.listen()
 	logging.info("Starting HTTP server")
-	app.run(host='0.0.0.0', port=55556, debug=False)
-	
+	app.run(host='0.0.0.0', port=8000, debug=False)
