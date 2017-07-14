@@ -29,17 +29,25 @@ twitter.listen()
 def index():
 	return flask.render_template('index.html')
 
-# MP3形式で音声ファイル出力
-@app.route('/say.mp3', methods=['GET', 'POST'])
-def gen_mp3():
+def get_input_text():
 	r = flask.request
 	text = r.form['text'] if r.method == "POST" else r.args.get('text', None)
 	
-	if text == None:
-		return 'plz specify `text`'
+	if text == None or text.strip() == "":
+		raise '`text` is empty!'
 	
+	return text
+
+# WAV形式で音声ファイル出力
+@app.route('/say.wav', methods=['GET', 'POST'])
+def gen_wav():
+	return flask.send_file(kiritan.talk(get_input_text()))
+
+# MP3形式で音声ファイル出力
+@app.route('/say.mp3', methods=['GET', 'POST'])
+def gen_mp3():
 	return flask.Response(
-		response=encoder.mp3(kiritan.talk(text)),
+		response=encoder.mp3(kiritan.talk(get_input_text())),
 		mimetype="audio/mp3",
 		headers={"Access-Control-Allow-Origin": "*"}
 	)
@@ -52,15 +60,9 @@ def listen():
 # ライブ配信へキューを投げる
 @app.route('/say', methods=['GET', 'POST'])
 def say():
-	r = flask.request
-	text = r.form['text'] if r.method == "POST" else r.args.get('text', None)
-	
-	if text == None:
-		return 'plz specify `text`'
-		
-	encoder.enqueue(kiritan.talk(text))
+	encoder.enqueue(kiritan.talk(get_input_text()))
 	return "ok"
-	
+
 # ライブ配信プレイリスト
 @app.route('/live.m3u8', methods=['GET', 'POST'])
 def live():
@@ -68,7 +70,7 @@ def live():
 		response=encoder.playlist(),
 		mimetype="application/x-mpegURL"
 	)
-	
+
 # 起動
 if __name__ == '__main__':
 	logging.info("Starting HTTP server")

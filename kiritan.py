@@ -16,6 +16,12 @@ from win32process import *
 waitSec = 0.1
 windowName = "VOICEROID＋ 東北きりたん EX"
 
+# WAV生成(排他)
+lock = threading.Lock()
+def talk(input):
+	with lock:
+		return generate_wav(input)
+
 # 子ウィンドウの検索
 def enum_child_windows(window):
 	result = []
@@ -27,8 +33,11 @@ def enum_child_windows(window):
 	return result
 
 # VOICELOIDを操作してWAV生成
-def talk(inputText):
-	logging.info("Generating WAV")
+def generate_wav(inputText):
+	# 空文字列は拒否
+	inputText = inputText.strip()
+	if inputText == "":
+		return None
 	
 	# 出力先ディレクトリ作成
 	outdir = "./output/"
@@ -36,16 +45,13 @@ def talk(inputText):
 		os.mkdir(outdir)
 	except:
 		pass
-		
+	
 	# ファイルが存在してたらやめる
-	outfile = outdir + hashlib.md5(inputText.encode("utf-8")).hexdigest() + ".wav"
+	outfile = os.path.abspath(outdir + hashlib.md5(inputText.encode("utf-8")).hexdigest() + ".wav")
 	if os.path.exists(outfile):
 		return outfile
-
-	# 一時ファイルが存在している間は待つ
-	tmpfile = "tmp.wav"
-	while os.path.exists(outfile):
-		time.sleep(waitSec)
+	
+	logging.info("Generating WAV")
 	
 	while True:
 		# VOICEROIDプロセスを探す
@@ -100,7 +106,7 @@ def talk(inputText):
 		for hwnd, className, windowText in enum_child_windows(dialog):
 			# ファイル名を入力
 			if className.count("Edit"):
-				SendMessage(hwnd, WM_SETTEXT, 0, tmpfile)
+				SendMessage(hwnd, WM_SETTEXT, 0, outfile)
 			
 			# 保存ボタンを押す
 			if windowText.count("保存"):
@@ -113,12 +119,10 @@ def talk(inputText):
 	while FindWindow(None, "音声保存"):
 		time.sleep(waitSec)
 	
+	# txtが存在していたら消す
 	try:
-		# ファイルを移動
-		os.rename(tmpfile, outfile)
-		# 一時ファイルが存在していたら消す
-		os.remove(tmpfile.replace("wav", "txt"))
+		os.remove(outfile.replace("wav", "txt"))
 	except:
 		pass
-		
+	
 	return outfile
